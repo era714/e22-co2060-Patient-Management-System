@@ -42,4 +42,17 @@ export const authService = {
   },
 
   isLoggedIn: () => !!localStorage.getItem("pms_token"),
+  isTokenExpired: () => {
+    const token = localStorage.getItem("pms_token");
+    if (!token) return true;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      return payload.exp < nowInSeconds;
+    } catch (e) {
+      // Token is malformed — treat as expired
+      return true;
+    }
+  },
 };

@@ -10,8 +10,15 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   // Initialize from localStorage so user stays logged in on page refresh.
-  const [user, setUser] = useState(() => authService.getCurrentUser());
-
+  const [user, setUser] = useState(() => {
+    // On app load — check if token is expired before restoring user
+    if (authService.isTokenExpired()) {
+      // Token expired or missing — clear storage and start fresh
+      authService.clearSession();
+      return null;
+    }
+    return authService.getCurrentUser();
+  });
   const saveLogin = (token, userData) => {
     authService.saveSession(token, userData);
     setUser(userData);
