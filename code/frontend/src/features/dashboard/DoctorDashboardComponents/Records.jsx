@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { patientRecordService } from '../../../services/patientRecordService';
-import New_Prescription from './Pharmacy';
+import New_Prescription from './Pharmacy.jsx';
 // import { 
 //   FaUser, FaPhone, FaEnvelope, FaCalendarAlt, 
 //   FaPrescriptionBottleMedical, FaFlask, FaEdit, 

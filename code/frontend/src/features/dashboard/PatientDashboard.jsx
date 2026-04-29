@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/AuthContext.jsx";
 import { patientDashboardService } from "../../services/patientDashboardService";
 
 const PatientDashboard = () => {
