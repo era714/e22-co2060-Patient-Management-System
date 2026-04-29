@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-// import AddDoctor from "./AdminDashboardComponents/AddDoctor";
-import AddNurse from "./AdminDashboardComponents/AddUser";
-import Stats from "./AdminDashboardComponents/Stats";           
-import Dashboard from "./AdminDashboardComponents/Dashboard";  
-import UsersList from "./AdminDashboardComponents/UsersList";
+// import AddDoctor from "./AdminDAshboardComponents/AddDoctor";
+import AddNurse from "./AdminDAshboardComponents/AddUser";
+import Stats from "./AdminDAshboardComponents/Stats";
+import Dashboard from "./AdminDAshboardComponents/Dashboard";
+import UsersList from "./AdminDAshboardComponents/UsersList";
 
 const AdminDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
