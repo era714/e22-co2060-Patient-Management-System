@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./AuthContext.jsx";
 import { authService } from "../../services/authService";
 
 const ROLE_ROUTES = {

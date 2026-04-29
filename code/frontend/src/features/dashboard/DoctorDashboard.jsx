@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import Dashboard from "./DoctorDashboardComponents/Dashboard";
-import Pharmacy from "./DoctorDashboardComponents/Pharmacy";
-import ReportAndAnalytics from "./DoctorDashboardComponents/ReportAndAnlytics";
-import Profile from "./DoctorDashboardComponents/Profile";
-import Records from "./DoctorDashboardComponents/Records";
-import LabReports from "./DoctorDashboardComponents/Labreport";
-import { useAuth } from "../auth/AuthContext";
+import Dashboard from "./DoctorDashboardComponents/Dashboard.jsx";
+import Pharmacy from "./DoctorDashboardComponents/Pharmacy.jsx";
+import ReportAndAnalytics from "./DoctorDashboardComponents/ReportAndAnlytics.jsx";
+import Profile from "./DoctorDashboardComponents/Profile.jsx";
+import Records from "./DoctorDashboardComponents/Records.jsx";
+import LabReports from "./DoctorDashboardComponents/Labreport.jsx";
+import { useAuth } from "../auth/AuthContext.jsx";
 import { doctorDashboardService } from "../../services/doctorDashboardService";
 
 const DoctorDashboard = () => {
