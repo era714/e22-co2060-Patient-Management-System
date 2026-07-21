@@ -55,10 +55,13 @@ public class User implements UserDetails {
     @Column(name = "mobilenumber", unique = true, nullable = false)
     private String mobileNumber;
 
+
     @Column(nullable = false)
     private String passwordHash;
     // NEVER store plain text here.
     // BCrypt hash stored: "$2a$10$xG9z3K..."
+
+
 
     @Enumerated(EnumType.STRING)
     // EnumType.STRING: stores "DOCTOR" in DB, not the number 2
@@ -82,10 +85,7 @@ public class User implements UserDetails {
     @Column
     private LocalDateTime updatedAt;
 
-    /**
-     * Returns true if the account is currently locked due to too many failed
-     * attempts.
-     */
+    /** Returns true if the account is currently locked due to too many failed attempts. */
     public boolean isCurrentlyLocked() {
         return lockedUntil != null && LocalDateTime.now().isBefore(lockedUntil);
     }
@@ -114,26 +114,13 @@ public class User implements UserDetails {
         return email;
     }
 
+
     // Account status methods.
     // isAccountNonLocked checks isActive → deactivated accounts cannot log in.
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    @Override public boolean isAccountNonExpired()     { return true; }
+    @Override public boolean isAccountNonLocked()      { return isActive; }
+    @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isEnabled()               { return isActive; }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return isActive;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return isActive;
-    }
 
 }
