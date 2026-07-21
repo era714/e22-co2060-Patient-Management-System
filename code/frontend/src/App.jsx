@@ -33,12 +33,11 @@ function App() {
   const isAuthPage = authPaths.includes(location.pathname);
 
   return (
-    <AuthWrapper {...authWrapperProps}>
-      <div className="app-shell">
-        <AmbientOrbs />
-        <div className="app-surface">
-          {/* Conditional Navbar Rendering */}
-          {!isAuthPage && (isLandingPage ? <NavbarLanding /> : <Navbar />)}
+    <div className="app-shell">
+      <AmbientOrbs />
+      <div className="app-surface">
+        {/* Conditional Navbar Rendering */}
+        {!isAuthPage && isLandingPage && <NavbarLanding />}
 
           <Routes>
             <Route path="/" element={<Home />} />
