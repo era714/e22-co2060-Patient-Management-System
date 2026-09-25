@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { receptionistService } from "../../../services/receptionistService";
-import { Calendar, User, Clock, Trash2, AlertCircle, CheckCircle, List, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, User, Clock, Trash2, AlertCircle, CheckCircle, List, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -11,6 +11,9 @@ const AppointmentScheduling = () => {
   const [patients, setPatients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState("list");
+  const [filterDoctor, setFilterDoctor] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   // Calendar state
   const [calYear, setCalYear] = useState(new Date().getFullYear());
@@ -52,6 +55,17 @@ const AppointmentScheduling = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  const getFilteredAppointments = () => {
+    let filtered = [...appointments];
+    if (filterDoctor) {
+      filtered = filtered.filter(a => String(a.doctorId) === filterDoctor || String(a.doctorName) === filterDoctor);
+    }
+    if (filterDate) {
+      filtered = filtered.filter(a => a.appointmentDateTime && a.appointmentDateTime.startsWith(filterDate));
+    }
+    return filtered.sort((a, b) => new Date(b.appointmentDateTime) - new Date(a.appointmentDateTime));
+  };
 
   // --- Calendar helpers ---
   const daysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
@@ -182,6 +196,31 @@ const AppointmentScheduling = () => {
     }
   };
 
+  const handleApprove = async (id) => {
+    setError(""); setSuccess("");
+    try {
+      await receptionistService.updateAppointment(id, { status: "CONFIRMED" });
+      setSuccess("Appointment confirmed successfully.");
+      await loadData();
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to confirm appointment.");
+    }
+  };
+
+  const handleDecline = async (id) => {
+    const reason = window.prompt("Please enter a reason for declining this appointment:");
+    if (reason === null) return; // User cancelled prompt
+    
+    setError(""); setSuccess("");
+    try {
+      await receptionistService.updateAppointment(id, { status: "REJECTED", declineReason: reason.trim() });
+      setSuccess("Appointment declined successfully.");
+      await loadData();
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to decline appointment.");
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between border-b border-slate-200 pb-4">
@@ -294,12 +333,54 @@ const AppointmentScheduling = () => {
         <div className="lg:col-span-2">
           {viewMode === "list" ? (
             <div className="bg-white border border-slate-200 rounded-lg shadow-sm">
-              <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 rounded-t-lg">
-                <h2 className="text-lg font-semibold text-slate-800">Upcoming Appointments</h2>
+              <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:justify-between sm:items-center bg-slate-50 rounded-t-lg gap-4">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-semibold text-slate-800">Upcoming Appointments</h2>
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="text-xs border border-slate-200 rounded-md py-1.5 px-3 bg-white text-slate-600 focus:ring-1 focus:ring-indigo-500 hover:bg-slate-50 outline-none cursor-pointer font-medium"
+                  >
+                    {showFilters ? "Hide Filters" : "Filter"}
+                  </button>
+                </div>
                 <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                   {appointments.length} Total
                 </span>
               </div>
+              {showFilters && (
+                <div className="p-4 border-b border-slate-200 bg-white flex flex-wrap gap-6 items-end">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Doctor</label>
+                    <select
+                      value={filterDoctor}
+                      onChange={(e) => setFilterDoctor(e.target.value)}
+                      className="text-sm border border-slate-200 rounded-md py-1.5 px-2 bg-white text-slate-700 outline-none focus:border-indigo-500"
+                    >
+                      <option value="">All Doctors</option>
+                      {doctors.map(d => (
+                        <option key={d.id} value={d.id}>Dr. {d.firstName} {d.lastName}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Date</label>
+                    <input
+                      type="date"
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)}
+                      className="text-sm border border-slate-200 rounded-md py-1 px-2 bg-white text-slate-700 outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  {(filterDoctor || filterDate) && (
+                    <button
+                      onClick={() => { setFilterDoctor(""); setFilterDate(""); }}
+                      className="text-xs text-indigo-600 hover:text-indigo-800 font-medium mb-1.5 underline underline-offset-2"
+                    >
+                      Clear Filters
+                    </button>
+                  )}
+                </div>
+              )}
               <div className="p-0 overflow-x-auto">
                 {isLoading ? (
                   <div className="p-8 text-center text-slate-500">Loading appointments...</div>
@@ -317,7 +398,7 @@ const AppointmentScheduling = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
-                      {appointments.map((appt) => {
+                      {getFilteredAppointments().map((appt) => {
                         const dateObj = new Date(appt.appointmentDateTime);
                         const isInvalidDate = isNaN(dateObj.getTime());
                         const dateDisplay = isInvalidDate ? "Invalid Date" : dateObj.toLocaleDateString();
@@ -341,21 +422,35 @@ const AppointmentScheduling = () => {
                             <td className="px-6 py-4 text-slate-700">Dr. {appt.doctorName || appt.doctorId}</td>
                             <td className="px-6 py-4">
                               <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
-                                appt.status === 'SCHEDULED' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                appt.status === 'SCHEDULED' || appt.status === 'CONFIRMED' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                                 appt.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border-green-200' :
-                                appt.status === 'CANCELLED' ? 'bg-red-50 text-red-700 border-red-200' :
+                                appt.status === 'CANCELLED' || appt.status === 'REJECTED' ? 'bg-red-50 text-red-700 border-red-200' :
+                                appt.status === 'PENDING' ? 'bg-amber-50 text-amber-700 border-amber-200' :
                                 'bg-slate-50 text-slate-700 border-slate-200'}`}>
                                 {appt.status || "SCHEDULED"}
                               </span>
                             </td>
                             <td className="px-6 py-4 text-right">
-                              {appt.status === 'SCHEDULED' && (
+                              {appt.status === 'PENDING' ? (
+                                <div className="flex items-center justify-end gap-3">
+                                  <button onClick={() => handleApprove(appt.id)}
+                                    className="text-emerald-600 hover:text-emerald-800 text-sm font-medium flex items-center gap-1"
+                                    title="Approve Appointment">
+                                    <CheckCircle className="w-4 h-4" /> Approve
+                                  </button>
+                                  <button onClick={() => handleDecline(appt.id)}
+                                    className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1"
+                                    title="Decline Appointment">
+                                    <X className="w-4 h-4" /> Decline
+                                  </button>
+                                </div>
+                              ) : (appt.status === 'SCHEDULED' || appt.status === 'CONFIRMED') ? (
                                 <button onClick={() => handleCancel(appt.id)}
                                   className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center justify-end gap-1 w-full"
                                   title="Cancel Appointment">
                                   <Trash2 className="w-4 h-4" /> Cancel
                                 </button>
-                              )}
+                              ) : null}
                             </td>
                           </tr>
                         );

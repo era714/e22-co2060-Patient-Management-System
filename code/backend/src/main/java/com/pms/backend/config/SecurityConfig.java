@@ -30,7 +30,7 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    @Value("${FRONTEND_URL:https://e22-2yp-co2060-pms-frontend.vercel.app}")
+    @Value("${FRONTEND_URL:https://e22-co2060-patient-management-syste-three.vercel.app}")
     private String frontendUrl;
 
     @Bean
@@ -67,10 +67,15 @@ public class SecurityConfig {
                     // Public endpoints
                     .requestMatchers(
                         "/api/auth/signup",
+                        "/api/auth/signup/verify-otp",
+                        "/api/auth/signup/resend-otp",
                         "/api/auth/login",
                         "/api/auth/google",
                         "/api/auth/refresh"
                     ).permitAll()
+
+                    // WebSocket endpoints — must be permitted for SockJS handshake
+                    .requestMatchers("/ws/**").permitAll()
 
                     // Admin-only endpoints
                     .requestMatchers("/api/audit/**")
@@ -115,11 +120,12 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         config.setExposedHeaders(List.of("Authorization"));
-        config.setAllowCredentials(false);
+        config.setAllowCredentials(true);  // Required for SockJS withCredentials=true
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);
+        source.registerCorsConfiguration("/ws/**", config);  // Allow WebSocket handshake
         return source;
     }
 }

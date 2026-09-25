@@ -11,7 +11,9 @@ import MgmtUsersList from "./ManagementDashboardComponents/MgmtUsersList";
 import MgmtPatientsList from "./ManagementDashboardComponents/MgmtPatientsList";
 import MgmtDoctorsList from "./ManagementDashboardComponents/MgmtDoctorsList";
 import MgmtProfileApprovals from "./ManagementDashboardComponents/MgmtProfileApprovals";
+import MgmtAppointmentsList from "./ManagementDashboardComponents/MgmtAppointmentsList";
 import AddUser from "./AdminDAshboardComponents/AddUser";
+import NotificationBell from "../../components/NotificationBell.jsx";
 
 const sectionLabels = {
   overview: "Overview",
@@ -20,6 +22,12 @@ const sectionLabels = {
   patients: "Manage Patients",
   approvals: "Profile Approvals",
   addUser: "Add Staff",
+  PHARMACIST: "Manage Pharmacists",
+  RECEPTIONIST: "Manage Receptionists",
+  LAB_TECHNICIAN: "Manage Lab Technicians",
+  MANAGEMENT: "Manage Management",
+  users: "All Users",
+  appointments: "All Appointments",
 };
 
 const ManagementDashboard = () => {
@@ -141,6 +149,7 @@ const ManagementDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationBell />
             <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200 ml-1">
               <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-sm">
                 {user?.email?.charAt(0).toUpperCase() || "M"}
@@ -163,12 +172,15 @@ const ManagementDashboard = () => {
 
         {/* Dynamic Content */}
         <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto">
-          {section === "overview" && <MgmtOverview />}
+          {section === "overview" && <MgmtOverview setSection={setSection} />}
           {section === "doctors" && <MgmtDoctorsList />}
-          {section === "nurses" && <MgmtUsersList roleFilter="NURSE" />}
           {section === "patients" && <MgmtPatientsList />}
+          {section === "appointments" && <MgmtAppointmentsList />}
           {section === "approvals" && <MgmtProfileApprovals />}
           {section === "addUser" && <AddUser />}
+          {(section === "users" || section === "nurses" || section === "PHARMACIST" || section === "RECEPTIONIST" || section === "LAB_TECHNICIAN" || section === "MANAGEMENT") && (
+            <MgmtUsersList roleFilter={section === "nurses" ? "NURSE" : section === "users" ? "" : section} />
+          )}
         </div>
       </main>
     </div>
